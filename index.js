@@ -1,34 +1,25 @@
 const express = require("express");
-const { exec } = require("child_process");
+const { ytDlpWrap } = require("yt-dlp-exec");
 const cors = require("cors");
 
 const app = express();
 app.use(cors());
 
-app.get("/download", (req, res) => {
+app.get("/download", async (req, res) => {
     const videoUrl = req.query.url;
     if (!videoUrl) {
         return res.status(400).json({ error: "URL is required" });
     }
 
-    // yt-dlp দিয়ে ভিডিওর ডাইরেক্ট ডাউনলোড লিংক বের করা
-    const command = `yt-dlp -f best --get-url "${videoUrl}"`;
-
-    exec(command, (error, stdout, stderr) => {
-        if (error) {
-            return res.status(500).json({ error: "Failed to fetch video", details: error.message });
-        }
-
-        const videoLink = stdout.trim();
-        if (!videoLink) {
-            return res.status(500).json({ error: "Could not extract video link" });
-        }
-
+    try {
+        const videoLink = await ytDlpWrap.getVideoUrl(videoUrl);
         res.json({ videoUrl: videoLink });
-    });
+    } catch (error) {
+        res.status(500).json({ error: "Failed to fetch video", details: error.message });
+    }
 });
 
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
     console.log(`Server is running on http://localhost:${PORT}`);
 });
