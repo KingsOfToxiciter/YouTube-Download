@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "start": "node index.js",
-    "postinstall": "apt install yt-dlp"
+    "postinstall": "pip install yt-dlp"
   },
   "dependencies": {
     "axios": "^1.8.1",
